@@ -104,7 +104,6 @@ if __name__ == "__main__":
 
 	Start_Site_Scraper('uc')
 	# Start_Site_Scraper('ic')
-
 	Start_Site_Scraper('c21')
 	Start_Site_Scraper('remax')
 

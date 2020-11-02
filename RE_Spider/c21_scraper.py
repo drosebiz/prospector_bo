@@ -1,6 +1,6 @@
-### c21_scraper.py 
-### Authors: DR
-### Scrapes listings from www.c21.com.bo
+# c21_scraper.py
+# Authors: DR
+# Scrapes listings from www.c21.com.bo
 
 import Listing
 import time
@@ -13,7 +13,9 @@ from selenium.common.exceptions import TimeoutException
 from selenium.common.exceptions import WebDriverException
 from selenium.common.exceptions import InvalidSessionIdException
 
-C21_URL_HEAD = 'https://c21.com.bo/busqueda/tipo_casa-o-casa-en-condominio-o-departamento-o-deposito-o-edificio-o-hotel-o-local-o-oficinas-o-penthouse-o-proyecto-o-quinta-o-rural-o-terreno-o-tinglado/operacion_venta/precio-desde_'
+C21_URL_HEAD = 'https://c21.com.bo/busqueda/tipo_casa-o-casa-en-condominio-o-departamento-o-deposito-o-edificio-o' \
+               '-hotel-o-local-o-oficinas-o-penthouse-o-proyecto-o-quinta-o-rural-o-terreno-o-tinglado' \
+               '/operacion_venta/precio-desde_ '
 C21_URL_MID = '/moneda_usd/'
 C21_RES_PER_PAGE = 9
 MIN_PRICE = '300000'
@@ -26,7 +28,6 @@ def Extract_Data(browser):
         url = browser.current_url
     except WebDriverException:
         print("Entry skipped due to WDE")
-        url = ""
         return -1
     try:
         prop_type = browser.find_element_by_xpath("//span[preceding-sibling::i[1][contains(@class,'fa-tags')]]").text
@@ -51,12 +52,13 @@ def Extract_Data(browser):
         dept = ""
 
     try:
-        bathrooms = browser.find_element_by_xpath("//span[preceding-sibling::i[1][contains(@class,'fa-bath')]]").text
+        bath_str = browser.find_element_by_xpath("//span[preceding-sibling::i[1][contains(@class,'fa-bath')]]").text
+        bathrooms = float(bath_str)
     except NoSuchElementException or AttributeError:
         bathrooms = ""
 
     try:
-        bedrooms = browser.find_element_by_xpath("//span[preceding-sibling::i[1][contains(@class,'fa-bed')]]").text
+        bedrooms = int(browser.find_element_by_xpath("//span[preceding-sibling::i[1][contains(@class,'fa-bed')]]").text)
     except NoSuchElementException or AttributeError:
         bedrooms = ""
 
@@ -74,8 +76,8 @@ def Extract_Data(browser):
         lot_size = ""
 
     try:
-        year = clean_year(
-            browser.find_element_by_xpath("//span[preceding-sibling::i[1][contains(@class,'fa-clock')]]").text)
+        dirty = browser.find_element_by_xpath("//span[preceding-sibling::i[1][contains(@class,'fa-clock')]]").text
+        year = clean_year(dirty)
     except NoSuchElementException or AttributeError:
         year = ""
 
@@ -90,8 +92,8 @@ def Extract_Data(browser):
         css_selector = "img[class^='img-static-map']"
         location = browser.find_element_by_css_selector(css_selector).get_attribute('onclick')
         coords = location.split('(')[1].split(')')[0].split(',')
-        lat = coords[0]
-        lon = coords[1]
+        lat = float(coords[0])
+        lon = float(coords[1])
 
     except (NoSuchElementException, AttributeError):
         lat = ""
@@ -105,7 +107,10 @@ def clean_price_and_area(value, delim):
     if delim in value:
         value = value.split(delim)[0]
     numeric_filter = filter(str.isdigit, value)
-    return ("".join(numeric_filter))
+    try:
+        return int("".join(numeric_filter))
+    except ValueError:
+        return ''
 
 
 def clean_year(year):
@@ -117,8 +122,8 @@ def clean_year(year):
     numeric_filter = filter(str.isdigit, year)
     year = int("".join(numeric_filter))
     if year < 1000:
-        year = currentYear - int(year)
-    return str(year)
+        year = currentYear - year
+    return year
 
 
 def clean_desc(desc):
@@ -142,9 +147,8 @@ def Load_Next_C21_Page(browser, page):
     time.sleep(SLEEP_TIME_SEARCH)
 
 
-def Get_C21_Data():  # browser):
+def Get_C21_Data():
     # New browser
-    # browser = webdriver.Firefox()
     options = Options()
     options.headless = True
     options.add_argument("--window-size=1920,1200")
@@ -160,17 +164,14 @@ def Get_C21_Data():  # browser):
     # Figure out how many pages to flip through
     num_pages = Get_C21_Page_Num(browser)
     # FOR TEST PURPOSES, UNCOMMENT NEXT LINE
-    # num_pages = 5
+    # num_pages = 4
     c21_listings = []
     c21_urls_clean = []
-
-    # print (str(num_pages) + " C21 pages to scrape.")
 
     # Scrape items from each page
     for page_num in range(1, num_pages + 1):
         # Get next page and find all gallery items
         Load_Next_C21_Page(browser, page_num)
-        # c21_items_page = browser.find_elements_by_xpath("//*[@class='gallery-item-container']")
         c21_items_page = browser.find_elements_by_xpath("//div/div/div/div/div[@class ='card rounded-0']")
 
         # Get all the listings' URLs

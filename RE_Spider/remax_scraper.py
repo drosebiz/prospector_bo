@@ -1,6 +1,6 @@
-### remax_scraper.py 
-### Authors: DR
-### Scrapes listings from www.remax.bo
+# remax_scraper.py
+# Authors: DR
+# Scrapes listings from www.remax.bo
 
 import Listing
 import time
@@ -28,7 +28,6 @@ def Extract_Data(browser):
         url = browser.current_url
     except WebDriverException:
         print("Entry skipped due to WDE")
-        url = ""
         return -1
 
     # Get 'dirty' data straight from page then clean it, if element exists
@@ -47,9 +46,9 @@ def Extract_Data(browser):
         attribute_whole = data.get_attribute('data-original-title')
         qty = attribute_whole.split()[-1]
         if "Bedrooms" in attribute_whole:
-            bedrooms = qty
+            bedrooms = int(qty)
         elif "Bathrooms" in attribute_whole:
-            bathrooms = qty
+            bathrooms = float(qty)
         elif "Lot Size (m2)" in attribute_whole:
             lot_size = clean_price_and_area(qty, '.')
         elif "Lot Size" in attribute_whole:
@@ -69,8 +68,6 @@ def Extract_Data(browser):
         price = ""
 
     try:
-        # prop_type = browser.find_element_by_tag_name("h2").text.split()[0]
-        # prop_type = browser.find_element_by_xpath("//*[@id='LeftColumn']/div/div/div/div/div/h1").text.split()[0]
         css_selector = "div[class^='col-xs-12 key-title'] h1"
         prop_type = browser.find_element_by_css_selector(css_selector).text.split('-')[0].strip()
     except NoSuchElementException or AttributeError:
@@ -93,14 +90,14 @@ def Extract_Data(browser):
         location = browser.find_element_by_css_selector(css_selector)
         innerhtml = location.get_property('innerHTML')
         coords = clean_coords(innerhtml)
-        lat = coords['lat']
-        lon = coords['lon']
+        lat = float(coords['lat'])
+        lon = float(coords['lon'])
 
     except NoSuchElementException or AttributeError:
-        lat = 0
-        lon = 0
+        lat = ""
+        lon = ""
 
-    # # Create new Listing object w clean data
+    # Create new Listing object w clean data
     return Listing.Listing(url, prop_type, price, desc, bathrooms, bedrooms, built_area,
                            lot_size, year, dept, agent, lat, lon)
 
@@ -109,13 +106,15 @@ def clean_price_and_area(value, delim):
     if delim in value:
         value = value.split(delim)[0]
     numeric_filter = filter(str.isdigit, value)
-    return ("".join(numeric_filter))
+    try:
+        return int("".join(numeric_filter))
+    except ValueError:
+        return ''
 
 
 def clean_desc(desc):
     if ',' in desc:
         split_desc = desc.split(',')
-        # desc = split_desc[len(split_desc)-1]
         desc = split_desc[-1]
         if desc[0] == " ":
             desc = desc[1:]
@@ -129,15 +128,14 @@ def clean_year(year):
         year = year.split()[0]
     currentYear = datetime.datetime.now().year
     numeric_filter = filter(str.isdigit, year)
-    year = "".join(numeric_filter)
-    if int(year) < 1000:
+    year = int("".join(numeric_filter))
+    if year < 1000:
         year = currentYear - int(year)
-    return str(year)
+    return year
 
 
 def clean_coords(html):
     lat = html.split('var lat = ')[1].split(';')[0]
-    # lat = lat_plus.split(';')[0]
     lng = html.split('var lng = ')[1].split(';')[0]
     return dict(
         lat=lat,
@@ -158,7 +156,6 @@ def Load_Next_Remax_Page(browser, page):
 
 def Get_Remax_Data():  # browser):
     # New browser
-    # browser = webdriver.Firefox()
     options = Options()
     options.headless = True
     options.add_argument("--window-size=1920,1200")
@@ -174,11 +171,9 @@ def Get_Remax_Data():  # browser):
     # Figure out how many pages to flip through
     num_pages = Get_Remax_Page_Num(browser)
     # FOR TEST PURPOSES, UNCOMMENT NEXT LINE
-    # num_pages = 5
+    # num_pages = 3
     remax_listings = []
     remax_urls_clean = []
-
-    # print (str(num_pages) + " REMAX pages to scrape.")
 
     # Scrape items from each page
     for page_num in range(1, num_pages + 1):
@@ -199,7 +194,6 @@ def Get_Remax_Data():  # browser):
             break
 
     # Extract data from each of the cleaned URLs
-    num = 0
     for url in remax_urls_clean:
         try:
             browser.get(url)
@@ -212,32 +206,3 @@ def Get_Remax_Data():  # browser):
 
     browser.quit()
     return remax_listings
-
-# browser = webdriver.Chrome()
-# browser.set_page_load_timeout(-1)
-# browser.set_script_timeout(5)
-# browser.get('http://www.remax.bo/en/listings/cochabamba/calle-los-lirios-zona-collpapampa/125004030-62?LFPNNSource=Search&cKey=125004030-62&HighlightingWords=')
-# # css_selector = "img[class^='width-100-percent a-btn-style']"
-# css_selector = "div.gallery-map-map div[class^='googlemap-office'] script[type^='text/javascript']"  # script"
-# location = browser.find_element_by_css_selector(css_selector)
-# innerhtml = location.get_property('innerHTML')
-# lat_plus = innerhtml.split('var lat = ')[1]
-# lat = lat_plus.split(';')[0]
-# lng = lat_plus.split(';')[1].split(';')[0].split('var lng = ')[1]
-# print("Lat: " + lat)
-# print("Long: " + lng)
-#
-# xpath = "//*[@id='gallery-map-map']/div/script[2]"
-# location = browser.find_element_by_xpath(xpath)
-# # if 'lat' in location:
-# # 	print ("Found it!")
-# # else:
-# # 	print ("WTF")
-# # print(location)
-# # location = location.split('(')[1].split(')')[0]
-# # coords = location.split(',')
-# # lat = coords[0]
-# # lon = coords[1]
-# # print("Latitude: " + lat)
-# # print("Longitude: " + lon)
-# # browser.quit()

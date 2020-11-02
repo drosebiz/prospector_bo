@@ -1,12 +1,12 @@
-### Listing.py 
-### Authors: DR
-### Definition for Listing object created from each property's data
-import googlemaps as maps
-from geopy.geocoders import Nominatim
+# Listing.py
+# Authors: DR
+# Definition for Listing object created from each property's data
+# import googlemaps as maps
+# from geopy.geocoders import Nominatim
 
 class Listing:
-    def __init__(self, url, prop_type, price="", desc="", baths="", beds="", area="", lot_size="", year="", dept="",
-                 agent="", lat="", lon=""):
+    def __init__(self, url, prop_type, price="Unlisted", desc="", baths="", beds="", area="", lot_size="",
+                 year="Unlisted", dept="", agent="", lat="", lon=""):
         self.url = url
         self.type = prop_type
         self.price = price

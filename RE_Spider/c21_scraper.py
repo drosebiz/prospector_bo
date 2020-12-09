@@ -136,7 +136,7 @@ def clean_desc(desc):
 
 
 def Get_C21_Page_Num(browser):
-    num_results_dirty = browser.find_element_by_xpath("//span[contains(text(),'1-9 de')]").text
+    num_results_dirty = browser.find_element_by_xpath("//span[contains(text(),'1-10 de')]").text
     num_results_clean = num_results_dirty.split()[-1]
     numeric_filter = filter(str.isdigit, num_results_clean)
     return math.ceil(int("".join(numeric_filter)) / C21_RES_PER_PAGE)

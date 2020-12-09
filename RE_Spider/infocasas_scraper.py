@@ -5,7 +5,7 @@
 import Listing
 import time
 import math
-from random import random
+import random
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import NoSuchElementException
@@ -124,7 +124,7 @@ def bypass_captcha(driver):
 	check_box = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, "recaptcha-anchor")))
 
 	print("Wait")
-	time.sleep(random(1.67, 4.03))
+	time.sleep(random.uniform(1.67, 4.03))
 	# self.wait_between(MIN_RAND, MAX_RAND)
 
 	# action = ActionChains(driver);
@@ -134,7 +134,7 @@ def bypass_captcha(driver):
 	check_box.click()
 
 	print("Wait")
-	time.sleep(random(1.67, 4.03))
+	time.sleep(random.uniform(1.67, 4.03))
 	# self.wait_between(MIN_RAND, MAX_RAND)
 
 	# print("Mouse movements")
@@ -147,7 +147,7 @@ def bypass_captcha(driver):
 	driver.switch_to.frame(iframes[2])
 
 	print("Wait")
-	time.sleep(random(5.81, 9.067))
+	time.sleep(random.uniform(5.81, 9.067))
 	# self.wait_between(LONG_MIN_RAND, LONG_MAX_RAND)
 
 	print("Find solver button")
@@ -156,14 +156,14 @@ def bypass_captcha(driver):
 	)
 
 	print("Wait")
-	time.sleep(random(5.81, 9.067))
+	time.sleep(random.uniform(5.81, 9.067))
 	# self.wait_between(LONG_MIN_RAND, LONG_MAX_RAND)
 
 	print("Click")
 	capt_btn.click()
 
 	print("Wait")
-	time.sleep(random(5.81, 9.067))
+	time.sleep(random.uniform(5.81, 9.067))
 	# self.wait_between(LONG_MIN_RAND, LONG_MAX_RAND)
 
 	try:
@@ -173,12 +173,12 @@ def bypass_captcha(driver):
 		)
 		alert = driver.switch_to.alert
 		print("Wait before accept alert")
-		time.sleep(random(1.67, 4.03))
+		time.sleep(random.uniform(1.67, 4.03))
 		# self.wait_between(MIN_RAND, MAX_RAND)
 
 		alert.accept()
 
-		time.sleep(random(1.67, 4.03))
+		time.sleep(random.uniform(1.67, 4.03))
 		# self.wait_between(MIN_RAND, MAX_RAND)
 		print("Alert accepted, retry captcha solver")
 
@@ -211,17 +211,24 @@ def bypass_captcha(driver):
 	# 	print("Couldn't click captcha.")
 
 
-def setUpProfile(browser):
-	browser.profile = webdriver.ChromeProfile()
-	browser.profile.add_extension("buster_captcha_solver_for_humans-1.1.0.xpi")
-	browser.profile.set_preference("security.fileuri.strict_origin_policy", False)  # disable Strict Origin Policy
-	browser.profile.update_preferences()  # Update profile with new configs
+def setUpProfile():
+	# browser.profile.add_extension("buster_captcha_solver_for_humans-1.1.0.xpi")
+	profile = "C:\\Users\\DRose\\AppData\\Local\\Google\\Chrome\\User Data\\Profile 1"
+
+	# Define chrome options
+	options = Options()
+	# options.headless = True
+	# browser.profile.set_preference("security.fileuri.strict_origin_policy", False)  # disable Strict Origin Policy
+	# browser.profile.update_preferences()  # Update profile with new configs
+	options.add_argument("--window-size=1920,1200")
+	options.add_argument("--log-level=3")
+	options.add_argument("user-data-dir=" + profile)
+	return webdriver.Chrome(options=options)
 
 
 def Get_Infocasas_Data():
 	# New browser
-	browser = webdriver.Chrome()
-	setUpProfile(browser)
+	browser = setUpProfile()
 	# options = Options()
 	# options.headless = True
 	# options.add_argument("--window-size=1920,1200")

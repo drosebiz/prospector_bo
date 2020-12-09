@@ -15,7 +15,7 @@ from datetime import date
 # Transfer data to Excel
 def Transfer_To_Excel(listings):
     # Open Excel Workbook and add a new Worksheet with today's data
-    workbook = xlsxwriter.Workbook("Data/Bolivian_Real_Estate_Data_" + str(date.today()) + ".xlsx")
+    workbook = xlsxwriter.Workbook("Data//Bolivian_Real_Estate_Data_" + str(date.today()) + ".xlsx")
     worksheet = workbook.add_worksheet('Data_' + str(date.today()))
 
     # Add a bold format to use to highlight cells.
